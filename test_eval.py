@@ -9,6 +9,7 @@ from io import BytesIO
 import pickle
 import ast
 import functools
+import json
 from transformers import AutoProcessor, AutoModel
 from diffusers import UNet2DConditionModel, DDIMScheduler
 from pipeline_stable_diffusion_multiobj import StableDiffusionPipelineMultiObj
@@ -21,12 +22,13 @@ parser = argparse.ArgumentParser(description="Evaluate reward scores from multi-
 parser.add_argument("--pretrained_model_name_or_path", type=str, default="runwayml/stable-diffusion-v1-5", help="Path to pretrained Stable Diffusion model.")
 parser.add_argument("--non_ema_revision", type=str, default=None, help="Optional revision tag for non-EMA UNet weights.")
 parser.add_argument("--eval_trainset", type=int, default=0, help="If 1, evaluate on train prompts; otherwise on test prompts.")
-parser.add_argument("--mix_rate", type=str, default="[0.25,0.25,0.5]", help="Weighting of reward components.")
-parser.add_argument("--t2i_path", type=str, required=True, help="Path to LoRA weights for image-text alignment fine-tuned UNet (e.g. ImageReward).")
-parser.add_argument("--vila_path", type=str, required=True, help="Path to LoRA weights for aesthetic score fine-tuned UNet (e.g. VILA).")
-parser.add_argument("--hp_path", type=str, required=True, help="Path to LoRA weights for human preference fine-tuned UNet (e.g. PickScore).")
-parser.add_argument("--gen_img_savepath", type=str, default="gen_figures/", help="Directory to save generated images.")
-parser.add_argument("--eval_savepath", type=str, default="multiObjEval/", help="Directory to save evaluation reward scores.")
+parser.add_argument("--prompt_json_dir", type=str, default='datasets/' required=True, help="Directory containing 'drawbench_train.json' and 'drawbench_test.json' prompt files.")
+parser.add_argument("--mix_rate", type=str, default="[1,1,1]", help="Weighting of reward components, e.g. '[1,2,1]'.")
+parser.add_argument("--t2i_path", type=str, required=True, help="Path to LoRA weights for image-text alignment UNet (e.g. ImageReward).")
+parser.add_argument("--vila_path", type=str, required=True, help="Path to LoRA weights for aesthetic score UNet (e.g. VILA).")
+parser.add_argument("--hp_path", type=str, required=True, help="Path to LoRA weights for human preference UNet (e.g. PickScore).")
+parser.add_argument("--gen_img_savepath", type=str, default="gen_figures/RS", help="Directory to save generated images.")
+parser.add_argument("--eval_savepath", type=str, default="multiPromptEval/", help="Directory to save evaluation reward scores.")
 parser.add_argument("--num_seeds", type=int, default=30, help="Number of random seeds to use for generation per prompt.")
 args = parser.parse_args()
 
@@ -92,9 +94,10 @@ def reward_hp(prompt, images):
     return score.item()
 
 # === Prompts ===
-train_prompts = ["A red colored car.", "A black colored dog."]
-test_prompts = ["A white colored dog.", "A purple colored dog."]
-prompts = train_prompts if args.eval_trainset == 1 else test_prompts
+json_file = "drawbench_train.json" if args.eval_trainset else "drawbench_test.json"
+with open(os.path.join(args.prompt_json_dir, json_file), 'r') as f:
+    all_prompts_dict = json.load(f)
+    prompts = list(all_prompts_dict.keys())
 
 # === Output path ===
 mix_rate = ast.literal_eval(args.mix_rate)
