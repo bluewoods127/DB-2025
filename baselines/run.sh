@@ -16,5 +16,15 @@ python3 -u run_CoDe.py \
 --n_samples 20 \
 --block_size 5 \
 
+source activate jax_torch_env
+python3 -u run_guidance.py  \
+--kl_coeff 0.1 \
+--reward_fn 'multi' \ 
+--is_tempering \ 
+--gamma 0.024 \
+--grad_norm \
+--ir_weight 0.2
+
+
 
 
