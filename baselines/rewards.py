@@ -15,7 +15,6 @@ import functools
 from io import BytesIO
 import torchvision
 
-ASSETS_PATH = Path("assets/")
 _model_handle = 'https://tfhub.dev/google/vila/image/1'
 _vila_model = hub.load(_model_handle)
 _predict_fn = _vila_model.signatures['serving_default']
