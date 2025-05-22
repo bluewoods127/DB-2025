@@ -1,5 +1,5 @@
 
-# DB-2025: Setup and Execution Guide
+# Diffusion Blend: Inference-Time Multi-Preference Alignment for Diffusion Models
 
 ## 📜 License References
 
