@@ -1,5 +1,5 @@
 
-# Diffusion Blend: Inference-Time Multi-Preference Alignment for Diffusion Models
+## Diffusion Blend: Inference-Time Multi-Preference Alignment for Diffusion Models
 
 **Diffusion Blend** addresses the challenge of aligning diffusion models with multiple user-defined objectives (e.g., aesthetics, text-image alignment) at inference time—without additional fine-tuning. It introduces a novel framework for *inference-time multi-preference alignment*, offering flexible control over both **reward trade-offs** and **KL regularization strength**.
 
