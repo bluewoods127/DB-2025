@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import random
 from diffusers import DDIMScheduler
 import scheduling_ddim_extended
-import pipelines.pipeline_stable_diffusion_code
+from pipelines.pipeline_stable_diffusion_CoDe import 
 import numpy as np
 import torch
 import rewards
