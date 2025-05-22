@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source activate dpok_4
+source activate #same_env_as_DB
 python3 -u run_RS.py \
 --cache_dir ".cache/" \
 --ir_weight 0.2 \
