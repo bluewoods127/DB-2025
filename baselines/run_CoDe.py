@@ -1,12 +1,12 @@
 import os
 import json
-import time
 from pathlib import Path
 from argparse import ArgumentParser
 import random
 from diffusers import DDIMScheduler
 import scheduling_ddim_extended
-from pipelines.pipeline_stable_diffusion_CoDe import StableDiffusionPipelineCoDe
+import pipeline_stable_diffusion_CoDe
+from pipeline_stable_diffusion_CoDe import StableDiffusionPipelineCoDe
 import numpy as np
 import torch
 import rewards
@@ -14,10 +14,24 @@ import rewards
 device = "cuda" if torch.cuda.is_available() else "cpu"
 inference_dtype = torch.float32
 
+def set_seed_torch(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(seed)
+    random.seed(seed)
+
+def set_seed_tf(seed):
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+
 
 def main(args):
     print(args)
-    total_start = time.time()  # <-- Start total time
     
     if args.run_folder:
         run_dir = Path(args.run_folder)
@@ -33,84 +47,62 @@ def main(args):
     with open(run_dir / "config.json", "w") as f:
         json.dump(vars(args), f, indent=2)
     with open(args.prompt_file, "r") as f:
-        test_prompts = json.load(f)
+        prompt_list = json.load(f)
+    
+    vila_fn = rewards.reward_vila
+    image_reward = rewards.ImageReward(inference_dtype=inference_dtype, device=device)
+    image_reward_fn = lambda images, prompts: (image_reward(images, prompts))
 
-    if args.reward_fn == 'hps':
-        reward_fn = rewards.hps_score(inference_dtype=inference_dtype, device=device)
-    elif args.reward_fn == 'pick':
-        reward_fn = rewards.PickScore(inference_dtype=inference_dtype, device=device)
-    elif args.reward_fn == 'aesthetic':
-        aesthetic_fn = rewards.aesthetic_score(torch_dtype=inference_dtype, device=device)
-        reward_fn = lambda images, prompts: aesthetic_fn(images, prompts)
-    elif args.reward_fn == 'clip':
-        clip_fn = rewards.clip_score(inference_dtype=inference_dtype, device=device)
-        reward_fn = lambda images, prompts: 20 * clip_fn(images, prompts)
-    elif args.reward_fn == 'imagereward':
-        image_reward_fn = rewards.ImageReward(inference_dtype=inference_dtype, device=device)
-        reward_fn = lambda images, prompts: (image_reward_fn(images, prompts))
-    elif args.reward_fn == 'multi':
-        vila_fn = rewards.reward_vila
-        image_reward = rewards.ImageReward(inference_dtype=inference_dtype, device=device)
-        image_reward_fn = lambda images, prompts: (image_reward(images, prompts))
-    elif args.reward_fn == 'vila':
-        reward_fn = rewards.reward_vila
-
-    pipe = StableDiffusionPipelineExtended.from_pretrained(
-        "runwayml/stable-diffusion-v1-5",
-        cache_dir="/scratch/user/fatemehdoudi/StableDiffusion/dpok/.cache/")
+    pipe = StableDiffusionPipelineCoDe.from_pretrained("runwayml/stable-diffusion-v1-5", cache_dir=args.cache_dir)
     pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
     pipe.to("cuda")
 
-    indices = np.arange(len(test_prompts))
-    #[2, 3, 5, 7, 8, 9, 11, 13, 15, 17, 19, 20, 30, 31, 36, 37, 38, 39, 40, 42, 44, 48, 53, 55, 57][::-1]
-    if args.is_rev:
-        indices=indices[::-1]
-    prompts = [test_prompts[i] for i in indices]
-
-    for prompt in prompts:
+    
+    for prompt in prompt_list:
         prompt_dir = run_dir / prompt.replace(" ", "_").replace("/", "_")
         prompt_dir.mkdir(parents=True, exist_ok=True)
+        t2i_scores = []
+        vila_scores = []
 
         for seed in range(args.n_seeds):
-            torch.manual_seed(seed)
-            torch.cuda.manual_seed(seed)
-            np.random.seed(seed)
-            random.seed(seed)
+            set_seed_torch(seed)
+            set_seed_tf(seed)
             image_path = prompt_dir / f"seed{seed}.png"
             if image_path.exists():
                 print(f"[Skip] {image_path} already exists.")
                 continue
 
-            start = time.time()  # <-- Start image time
-            if args.reward_fn == 'multi':
-                image = pipe.forward_collect_traj_ddim(
-                    prompt=prompt, eta=1.0, n_samples=args.n_samples,
-                    block_size=args.block_size, reward_fn_name='multi',
-                    ir_reward_fn=image_reward_fn, vila_reward_fn=vila_fn,
-                    ir_weight=args.ir_weight)
-            else:
-                image = pipe.forward_collect_traj_ddim(
-                    prompt=prompt, eta=1.0, reward_fn=reward_fn,
-                    n_samples=args.n_samples, block_size=args.block_size,
-                    reward_fn_name=args.reward_fn)
+            images = pipe.forward_collect_traj_ddim( 
+                prompt=prompt, eta=1.0, n_samples=args.n_samples,
+                block_size=args.block_size, reward_fn_name='multi',
+                ir_reward_fn=image_reward_fn, vila_reward_fn=vila_fn,
+                ir_weight=args.ir_weight)
 
-            image[0].save(image_path)
-            duration = time.time() - start  # <-- End image time
-            print(f"[Time] {image_path} generated in {duration:.2f} sec")
-
-    total_duration = time.time() - total_start  # <-- End total time
-    print(f"[Total Time] Run completed in {total_duration/60:.2f} minutes")
+            images[0].save(image_path)
+            
+            reward_img = image_reward_fn(images[0], prompt)
+            vila_score = vila_fn(images[0])
+            
+            reward_img, vila_score = reward_img.item(), vila_score[0][0]
+            t2i_scores.append(reward_img)
+            vila_scores.append(vila_score)
+            
+        with open(prompt_dir / f"t2i_w_{args.ir_weight}.pkl", 'wb') as file:
+            pickle.dump(t2i_scores, file)
+        with open(prompt_dir / f"vila_w_{args.ir_weight}.pkl", 'wb') as file:
+            pickle.dump(vila_scores, file)
+            
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--seed", default=0, type=int)
-    parser.add_argument("--reward_fn", default="aesthetic")
+    
     parser.add_argument("--ir_weight", type=float, default=0.5)
-    parser.add_argument("--n_samples", default=64, type=int)
+    parser.add_argument("--n_samples", default=20, type=int)
     parser.add_argument("--n_seeds", default=2, type=int)
     parser.add_argument("--block_size", default=5, type=int)
     parser.add_argument("--prompt_file", type=str, default="dataset/all_prompts.json")
-    parser.add_argument("--is_rev", action="store_true")
     parser.add_argument("--run_folder", type=str, default=None, help="Use this folder as run output if provided")
+    parser.add_argument("--cache_dir", type=str, default='.cache/')
+
     main(parser.parse_args())
