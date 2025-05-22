@@ -1,4 +1,4 @@
-name: jax_torch2
+name: jax_torch_env
 channels:
   - defaults
 dependencies:
