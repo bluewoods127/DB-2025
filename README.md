@@ -19,7 +19,7 @@ conda activate DB_env
 
 > **Note:** The environment defined in `environment.yaml` is used for most parts of the paper.
 
-For the **RGG baseline** (which uses JAX), we created a separate environment to avoid interference with the main models.
+For the **RGG baseline** (which uses JAX for Vila reward), we created a separate environment to avoid interference with the main models.
 
 ---
 
