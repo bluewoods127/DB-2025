@@ -35,7 +35,7 @@ bash install_image_reward.sh
 
 ## 🏋️ Step 3: Training with DPOK
 
-To fine-tune models for a given `(reward_weight, kl_weight)` setting, use the `train_online_pg.py` script:
+To fine-tune models for a given `(reward_weight, kl_weight)` setting, use the `train_online_pg.py` script to obtain checkpoints:
 
 ```bash
 accelerate launch train_online_pg.py \
@@ -58,4 +58,12 @@ accelerate launch train_online_pg.py \
 
 ## 🚀 Step 4: Run DB Code
 
-After training, use the `run_*.py` scripts to generate images and evaluate performance, depending on the setup and reward functions used.
+After training and obtaining checkpoints for each reward model, use the `run_DB.py` scripts to generate images and evaluate performance, depending on the setup and reward functions used.
+
+```bash
+python3 -u run_DB.py --cache_dir ".cache/" \
+--ir_weight 0.2 \
+--prompt_file "dataset/test_prompts.json" \
+--t2i_path 'path_to_checkpoint/pytorch_lora_weights.bin' \
+--vila_path 'path_to_checkpoint/pytorch_lora_weights.bin'
+```
