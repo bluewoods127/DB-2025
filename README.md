@@ -12,7 +12,7 @@
 ### 🌈 Visual Overview
 
 <p align="center">
-  <img src="assets/db_mpa_overview.png" alt="Diffusion Blend Overview" width="600"/>
+  <img src="assets/DB-overview.pdf" alt="Diffusion Blend Overview" width="600"/>
 </p>
 
 *Figure: DB-MPA blends denoisers from fine-tuned models at inference time to align with user-specified reward vectors.*
