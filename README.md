@@ -1,6 +1,25 @@
 
 # Diffusion Blend: Inference-Time Multi-Preference Alignment for Diffusion Models
 
+**Diffusion Blend** addresses the challenge of aligning diffusion models with multiple user-defined objectives (e.g., aesthetics, text-image alignment) at inference time—without additional fine-tuning. It introduces a novel framework for *inference-time multi-preference alignment*, offering flexible control over both **reward trade-offs** and **KL regularization strength**.
+
+### Key Contributions:
+- Introduces DB-MPA (Multi-Preference Alignment) and DB-KLA (KL Alignment).
+- Enables blending of backward diffusion processes from fine-tuned models.
+- Achieves near-oracle performance while maintaining efficiency.
+- Eliminates the need for per-preference fine-tuning.
+
+### 🌈 Visual Overview
+
+<p align="center">
+  <img src="assets/db_mpa_overview.png" alt="Diffusion Blend Overview" width="600"/>
+</p>
+
+*Figure: DB-MPA blends denoisers from fine-tuned models at inference time to align with user-specified reward vectors.*
+
+> See full paper: [`2025_Diffusion_Blend.pdf`](2025_Diffusion_Blend.pdf)
+
+
 ## 📜 License References
 
 - [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
