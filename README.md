@@ -17,10 +17,6 @@
 
 *Figure: DB-MPA blends denoisers from fine-tuned models at inference time to align with user-specified reward vectors.*
 
-## 📜 License References
-
-- [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
-- [DAS Krafton License](https://github.com/krafton-ai/DAS/blob/main/das)
 
 ---
 
@@ -83,6 +79,12 @@ python3 -u run_DB.py --cache_dir ".cache/" \
 --t2i_path 'path_to_checkpoint/pytorch_lora_weights.bin' \
 --vila_path 'path_to_checkpoint/pytorch_lora_weights.bin'
 ```
+
+## 📜 License References
+
+- [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
+- [DAS Krafton License](https://github.com/krafton-ai/DAS/blob/main/das)
+
 ## Contact
 
 If you have any questions or concerns, please contact us: minrara404@tamu.edu or fatemehdoudi@tamu.edu or submit an issue.
