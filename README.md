@@ -1,16 +1,16 @@
-# DB-2025
-ToDo:
--DB code,
--llicense DPOK
--How to run 
--Env
+# DB-2025: Setup and Execution Guide
 
+## 📜 License References
 
-## step1. create conda env 
+- [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
+- [DAS Krafton License](https://github.com/krafton-ai/DAS/blob/main/das)
 
-## step2. bash install_image_reward.sh
+---
 
-## step3. train
+## ✅ Step 1: Environment Setup
 
+Create and activate the environment:
 
-## run DB code
+```bash
+conda env create -f environment.yaml
+conda activate DB_env
