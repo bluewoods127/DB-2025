@@ -17,9 +17,6 @@
 
 *Figure: DB-MPA blends denoisers from fine-tuned models at inference time to align with user-specified reward vectors.*
 
-> See full paper: [`2025_Diffusion_Blend.pdf`](2025_Diffusion_Blend.pdf)
-
-
 ## 📜 License References
 
 - [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
