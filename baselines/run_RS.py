@@ -1,10 +1,13 @@
+import sys
+sys.path.append("..")
+import ImageReward as imagereward
+import utils
 import os
 import json
 from pathlib import Path
 from argparse import ArgumentParser
 import random
 from diffusers import DDIMScheduler
-import scheduling_ddim_extended
 from diffusers import StableDiffusionPipeline  # pylint: disable=g-importing-member
 import numpy as np
 import torch
@@ -12,7 +15,6 @@ import copy
 import pickle
 import tensorflow as tf
 import tensorflow_hub as hub
-import ImageReward as imagereward
 from io import BytesIO
 import functools
 import utils
