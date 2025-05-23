@@ -79,6 +79,9 @@ python3 -u run_DB.py --cache_dir ".cache/" \
 --t2i_path 'path_to_checkpoint/pytorch_lora_weights.bin' \
 --vila_path 'path_to_checkpoint/pytorch_lora_weights.bin'
 ```
+## Contact
+
+If you have any questions or concerns, please contact us: minrara404@tamu.edu or fatemehdoudi@tamu.edu or submit an issue.
 
 ## 📜 License References
 
