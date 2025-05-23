@@ -5,7 +5,7 @@ from transformers import AutoModel, AutoProcessor
 
 
 class PickScoreScorer(nn.Module):
-    def __init__(self, dtype, device, cache_dir='/scratch/user/fatemehdoudi/StableDiffusion/dpok/.cache/'):
+    def __init__(self, dtype, device, cache_dir='$HOME/.cache/'):
         super().__init__()
         self.dtype = dtype
         self.device = device
