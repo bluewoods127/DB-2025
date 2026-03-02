@@ -84,3 +84,6 @@ python3 -u run_DB.py --cache_dir ".cache/" \
 
 - [Google Research DPOK License](https://github.com/google-research/google-research/tree/master/dpok)
 - [DAS Krafton License](https://github.com/krafton-ai/DAS/blob/main/das)
+
+## Contact Us
+Min Cheng: mincheng@tamu.edu; Fatemeh Doudi: fatemehdoudi@tamu.edu
